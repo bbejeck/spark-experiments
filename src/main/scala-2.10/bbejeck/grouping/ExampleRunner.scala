@@ -1,5 +1,7 @@
 package bbejeck.grouping
 
+import bbejeck.cornercases.MappingValues
+
 /**
  * Created by bbejeck on 7/31/15.
  */
@@ -9,7 +11,10 @@ object ExampleRunner {
 
       //Grouping.runGroupingExample(args)
       //AggregateByKey.runAggregateByKeyExample()
-      CombineByKey.runCombineByKeyExample()
+      //CombineByKey.runCombineByKeyExample()
+      //StripFirstLines.stripLinesExample(args)
+      //Splitting.runSplitExample()
+      MappingValues.runMappingValues()
 
 
   }
