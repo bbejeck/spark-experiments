@@ -1,4 +1,4 @@
-package bbejeck.grouping
+package bbejeck
 
 import bbejeck.cornercases.MappingValues
 
