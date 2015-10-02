@@ -64,26 +64,16 @@ object AirlineFlightUtils {
     }
   }
 
+  case class FlightKey(airLineId: String, arrivalAirPortId: Int, arrivalDelay: Double)
 
-  case class FlightKey(airLineId: String, arrivalAirPortId: Int, arrivalDelay: Double) extends Ordered[FlightKey] {
+  object FlightKey {
 
-    override def compare(that: FlightKey): Int = {
-      val comp = airLineId.compareTo(that.airLineId)
-      if (comp == 0) {
-        val dcomp = arrivalAirPortId.compareTo(that.arrivalAirPortId)
-        if (dcomp == 0) {
-          arrivalDelay.compareTo(that.arrivalDelay) * -1
-        } else {
-          dcomp
-        }
-      } else {
-        comp
-      }
+    implicit def orderingByIdAirportIdDelay[A <: FlightKey] : Ordering[A] = {
+       Ordering.by(fk => (fk.airLineId, fk.arrivalAirPortId, fk.arrivalDelay * -1))
     }
-
   }
 
-  class AirlineFlightPartitioner(partitions: Int) extends Partitioner {
+    class AirlineFlightPartitioner(partitions: Int) extends Partitioner {
     require(partitions >= 0, s"Number of partitions ($partitions) cannot be negative.")
 
     override def numPartitions: Int = partitions
