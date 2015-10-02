@@ -59,17 +59,17 @@ object AirlineFlightUtils {
     }
 
     def fromKeyAndData(k: FlightKey, l: List[String]): DelayedFlight = {
-      DelayedFlight(k.airLineId,l(0),safeInt(l(1)), safeInt(l(2)),k.arrivalAirPortId,safeInt(l(3)),k.arrivalDelay)
+      DelayedFlight(k.airLineId,l(0),safeInt(l(1)), safeInt(l(2)),k.arrivalAirportId,safeInt(l(3)),k.arrivalDelay)
 
     }
   }
 
-  case class FlightKey(airLineId: String, arrivalAirPortId: Int, arrivalDelay: Double)
+  case class FlightKey(airLineId: String, arrivalAirportId: Int, arrivalDelay: Double)
 
   object FlightKey {
 
     implicit def orderingByIdAirportIdDelay[A <: FlightKey] : Ordering[A] = {
-       Ordering.by(fk => (fk.airLineId, fk.arrivalAirPortId, fk.arrivalDelay * -1))
+       Ordering.by(fk => (fk.airLineId, fk.arrivalAirportId, fk.arrivalDelay * -1))
     }
   }
 
