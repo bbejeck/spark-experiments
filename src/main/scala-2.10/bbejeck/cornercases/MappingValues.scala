@@ -14,13 +14,23 @@ object MappingValues {
     Logger.getLogger ("org.apache").setLevel (Level.ERROR)
     Logger.getLogger ("org.eclipse.jetty.server").setLevel (Level.OFF)
 
+    case class IdText(numberId:Int, text:String)
+    implicit def convertTuple = (t:(Int,String)) =>  new IdText(t._1,t._2)
+
+
+
     val sc = new SparkContext(new SparkConf().setAppName("Mapping Values"))
 
     val data = sc.parallelize(Array( (1,"foo"),(2,"bar"),(3,"baz"))).cache()
 
     val originalPartitions = data.partitions
 
-    val mappedRdd = data.map(x => (x._1,x._2.toUpperCase))
+
+    def convertCase(score: IdText) = {
+      (score.numberId, score.text.toUpperCase)
+    }
+
+    val mappedRdd = data.map(x => convertCase(x))
 
     val mappedValuesRdd = data.mapValues(s => s.toUpperCase)
 

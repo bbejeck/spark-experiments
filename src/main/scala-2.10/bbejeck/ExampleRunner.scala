@@ -1,6 +1,6 @@
 package bbejeck
 
-import bbejeck.cornercases.MappingValues
+import bbejeck.sorting.SecondarySort
 
 /**
  * Created by bbejeck on 7/31/15.
@@ -14,7 +14,10 @@ object ExampleRunner {
       //CombineByKey.runCombineByKeyExample()
       //StripFirstLines.stripLinesExample(args)
       //Splitting.runSplitExample()
-      MappingValues.runMappingValues()
+     // MappingValues.runMappingValues()
+      //AirlineFlightPerformance.runInitialFlightPerformanceDataFrame(args(0))
+      SecondarySort.runSecondarySortExample(args)
+
 
 
   }
