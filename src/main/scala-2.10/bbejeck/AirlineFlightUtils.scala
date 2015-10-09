@@ -1,7 +1,6 @@
 package bbejeck
 
 import org.apache.spark.Partitioner
-import bbejeck.Utils._
 
 /**
  * Created by bbejeck on 9/18/15.
@@ -37,32 +36,20 @@ object AirlineFlightUtils {
   val CANCELLATION_CODE = 22
   val DIVERTED = 23
 
-  case class DelayedFlight(airLineId: String,
+  //Lookup keys
+  val AIRLINE_DATA = "L_UNIQUE_CARRIERS"
+  val AIRPORT_DATA = "L_AIRPORT_ID"
+  val CITY_DATA = "L_CITY_MARKET_ID"
+
+  case class DelayedFlight(airLine: String,
                            date: String,
-                           originAirportId: Int,
-                           originCityId: Int,
-                           destAirportId: Int,
-                           destCityId: Int,
+                           originAirport: String,
+                           originCity: String,
+                           destAirport: String,
+                           destCity: String,
                            arrivalDelay: Double) {
-
-    def key(): FlightKey = {
-      FlightKey(airLineId, destAirportId, arrivalDelay)
-    }
-
   }
 
-
-  object DelayedFlight {
-    def parse(line: String): DelayedFlight = {
-      val arr = line.split(",")
-      DelayedFlight(arr(UNIQUE_CARRIER), arr(FL_DATE), safeInt(arr(ORIGIN_AIRPORT_ID)), safeInt(arr(ORIGIN_CITY_MARKET_ID)), safeInt(arr(DEST_AIRPORT_ID)), safeInt(arr(DEST_CITY_MARKET_ID)),safeDouble(arr(ARR_DELAY)))
-    }
-
-    def fromKeyAndData(k: FlightKey, l: List[String]): DelayedFlight = {
-      DelayedFlight(k.airLineId,l(0),safeInt(l(1)), safeInt(l(2)),k.arrivalAirportId,safeInt(l(3)),k.arrivalDelay)
-
-    }
-  }
 
   case class FlightKey(airLineId: String, arrivalAirportId: Int, arrivalDelay: Double)
 

@@ -3,6 +3,9 @@ package bbejeck.sorting
 import bbejeck.AirlineFlightUtils._
 import bbejeck.SparkJob
 import bbejeck.Utils._
+import bbejeck.broadcast.GuavaTableLoader
+import com.google.common.collect.Table
+import org.apache.spark.broadcast.Broadcast
 
 /**
  * Created by bbejeck on 9/18/15.
@@ -10,19 +13,45 @@ import bbejeck.Utils._
  */
 object SecondarySort extends SparkJob {
 
+  type RefTable = Table[String, String, String]
+
+
   def runSecondarySortExample(args: Array[String]): Unit = {
 
+    val dataPath = args(0)
+    val refDataPath = args(1)
+    val refDataFiles = args(2)
+
+
     val sc = context("SecondarySorting")
-    val rawDataArray = sc.textFile(args(0)).map(line => line.split(","))
+    val rawDataArray = sc.textFile(dataPath).map(line => line.split(","))
+
+    val table = GuavaTableLoader.load(refDataPath, refDataFiles)
+
+    val bcTable = sc.broadcast(table)
+
     val airlineData = rawDataArray.map(arr => createKeyValueTuple(arr))
     val keyedDataSorted = airlineData.repartitionAndSortWithinPartitions(new AirlineFlightPartitioner(5))
 
-    //only done locally for demo purposes, usually write out to HDFS
-    keyedDataSorted.collect().foreach(println)
+    val translatedData = keyedDataSorted.map(t => createDelayedFlight(t._1, t._2, bcTable))
+
+    //printing out only done locally for demo purposes, usually write out to HDFS
+    translatedData.collect().foreach(println)
   }
 
-  def createKeyValueTuple(data: Array[String]) :(FlightKey,List[String]) = {
-      (createKey(data),listData(data))
+  def createDelayedFlight(key: FlightKey, data: List[String], bcTable: Broadcast[RefTable]): DelayedFlight = {
+    val table = bcTable.value
+    val airline = table.get(AIRLINE_DATA, key.airLineId)
+    val destAirport = table.get(AIRPORT_DATA, key.arrivalAirportId.toString)
+    val destCity = table.get(CITY_DATA, data(3))
+    val origAirport = table.get(AIRPORT_DATA, data(1))
+    val originCity = table.get(CITY_DATA, data(2))
+
+    DelayedFlight(airline, data.head, origAirport, originCity, destAirport, destCity, key.arrivalDelay)
+  }
+
+  def createKeyValueTuple(data: Array[String]): (FlightKey, List[String]) = {
+    (createKey(data), listData(data))
   }
 
   def createKey(data: Array[String]): FlightKey = {
