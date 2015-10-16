@@ -5,6 +5,8 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.collection.mutable
 
+import bbejeck.implicits.GroupingRDDUtils._
+
 /**
  * Created by bbejeck on 7/31/15.
  *
@@ -21,7 +23,6 @@ object AggregateByKey {
     val keysWithValuesList = Array("foo=A", "foo=A", "foo=A", "foo=A", "foo=B", "bar=C", "bar=D", "bar=D")
 
     val data = sc.parallelize(keysWithValuesList)
-
     //Create key value pairs
     val kv = data.map(_.split("=")).map(v => (v(0), v(1))).cache()
 
@@ -30,6 +31,8 @@ object AggregateByKey {
     val mergePartitionSets = (p1: mutable.HashSet[String], p2: mutable.HashSet[String]) => p1 ++= p2
 
     val uniqueByKey = kv.aggregateByKey(initialSet)(addToSet, mergePartitionSets)
+
+    val uniqueByKeyImplicits = kv.groupByKeyUnique()
 
     val initialCount = 0;
     val addToCounts = (n: Int, v: String) => n + 1
@@ -44,6 +47,16 @@ object AggregateByKey {
     for(indx <- uniqueResults.indices){
         val r = uniqueResults(indx)
         println(r._1 + " -> " + r._2.mkString(","))
+    }
+
+    println("------------------")
+
+    println("Aggregate By Key uniqueByKeyImplicits Results")
+
+    val uniqueResultsII = uniqueByKeyImplicits.collect()
+    for(indx <- uniqueResultsII.indices){
+      val r = uniqueResults(indx)
+      println(r._1 + " -> " + r._2.mkString(","))
     }
 
     println("------------------")
